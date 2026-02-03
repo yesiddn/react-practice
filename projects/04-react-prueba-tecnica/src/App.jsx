@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react"
 import { getRandomFact } from "./services/facts"
+import { useCatImage } from "./hooks/useCatImage"
 
 const CAT_ENDPOINT_RANDOM_FACT = 'https://catfact.ninja/fact'
 const CAT_ENDPOINT_IMAGE_URL = (firstWord) => `https://cataas.com/cat/says/${firstWord}?size=50&json=true`
 
 export function App() {
   const [fact, setFact] = useState(null)
-  const [imageUrl, setImageUrl] = useState(null)
+  // const [imageUrl, setImageUrl] = useState(null)
+  const { imageUrl } = useCatImage({ fact })
 
   // un solo effect
   // useEffect(() => { 
@@ -46,17 +48,18 @@ export function App() {
       })
   }, [])
 
-  useEffect(() => {
-    if (!fact) return
+  // se reemplaza por el custom hook
+  // useEffect(() => {
+  //   if (!fact) return
 
-    const firstWord = fact.split(' ', 3).join(' ')
+  //   const firstWord = fact.split(' ', 3).join(' ')
 
-    fetch(CAT_ENDPOINT_IMAGE_URL(firstWord))
-      .then(res => res.json())
-      .then(response => {
-        setImageUrl(response.url)
-      })
-  }, [fact])
+  //   fetch(CAT_ENDPOINT_IMAGE_URL(firstWord))
+  //     .then(res => res.json())
+  //     .then(response => {
+  //       setImageUrl(response.url)
+  //     })
+  // }, [fact])
 
   const handleClick = async () => {
     const newFact = await getRandomFact()
