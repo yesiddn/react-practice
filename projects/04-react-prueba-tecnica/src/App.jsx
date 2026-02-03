@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { getRandomFact } from "./services/facts"
 
 const CAT_ENDPOINT_RANDOM_FACT = 'https://catfact.ninja/fact'
 const CAT_ENDPOINT_IMAGE_URL = (firstWord) => `https://cataas.com/cat/says/${firstWord}?size=50&json=true`
@@ -56,10 +57,17 @@ export function App() {
         setImageUrl(response.url)
       })
   }, [fact])
+
+  const handleClick = async () => {
+    const newFact = await getRandomFact()
+    // nunca debe salir del componente el setStatement
+    setFact(newFact)
+  }
   
   return (
     <main>
       <h1>Cat facts</h1>
+      <button onClick={handleClick}>Get new fact</button>
       {fact && <p>{fact}</p>}
       {imageUrl && <img style={{maxWidth: '200px'}} src={imageUrl} alt={`Image extracted using the first three words for ${fact}`} />}
     </main>
