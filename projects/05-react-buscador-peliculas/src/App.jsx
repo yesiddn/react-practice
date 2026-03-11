@@ -41,8 +41,8 @@ function useSearch() {
 }
 
 function App() {
-  const { movies } = useMovies();
   const { query, setQuery, error } = useSearch();
+  const { movies, getMovies, loading } = useMovies({ query });
   // const inputRef = useRef(); // <- no abusar de esto, generalmente hay mejores formas de hacerlo, pero en este caso lo mejor es usar lo nativo
   // si tienes 10 inputs y usas 10 useRef, es un poco molesto
   // ahora, lo malo con esto es que cada vez que el usuario escriba algo, el componente se va a renderizar
@@ -70,6 +70,8 @@ function App() {
 
     // ahora, con el formulario controlado, el valor del input ya lo tenemos en el estado query
     console.log({ query });
+
+    getMovies();
   };
 
   // la forma "controlada" o "controlled form" es cuando cada input tiene un estado asociado y se actualiza cada vez que el usuario escribe algo
@@ -108,7 +110,7 @@ function App() {
       </header>
 
       <main>
-        <Movies movies={movies} />
+        {loading ? <p>Cargando...</p> : <Movies movies={movies} />}
       </main>
     </div>
   );
