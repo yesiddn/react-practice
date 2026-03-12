@@ -3,6 +3,8 @@ import './App.css';
 import { useRef, useState, useEffect } from 'react';
 import { Movies } from './components/Movies';
 import { useMovies } from './hooks/useMovies';
+import debounce from 'just-debounce-it';
+import { useMemo } from 'react';
 
 function useSearch() {
   const [query, setQuery] = useState('');
@@ -41,8 +43,21 @@ function useSearch() {
 }
 
 function App() {
+  const [sort, setSort] = useState(false);
+  
   const { query, setQuery, error } = useSearch();
-  const { movies, getMovies, loading } = useMovies({ query });
+  const { movies, getMovies, loading } = useMovies({ query, sort });
+
+  // const debouncedGetMovies = useCallback( // useCallback solo funciona con inline functions, es decir, con arrow functions, no funciona con funciones declaradas, por eso es necesario usar useMemo para crear la función debouncedGetMovies
+  const debouncedGetMovies = useMemo(() => {
+    return debounce((search) => {
+      console.log(`search movies with query: ${search}`);
+      getMovies({ query: search });
+    }, 500)
+  },
+    [getMovies],
+  );
+
   // const inputRef = useRef(); // <- no abusar de esto, generalmente hay mejores formas de hacerlo, pero en este caso lo mejor es usar lo nativo
   // si tienes 10 inputs y usas 10 useRef, es un poco molesto
   // ahora, lo malo con esto es que cada vez que el usuario escriba algo, el componente se va a renderizar
@@ -62,16 +77,16 @@ function App() {
 
     const fields = new FormData(e.target); // FormData es una interfaz que nos permite construir un conjunto de pares clave/valor representando los campos de un formulario y sus valores, que luego pueden ser fácilmente enviados utilizando el método fetch o XMLHttpRequest
     const query = fields.get('query'); // con FormData podemos acceder al valor del input de una forma mas sencilla, ya que solo necesitamos el nombre del campo para obtener su valor, en este caso 'query'
-    console.log(query);
+    // console.log(query);
 
     // si hubiesen muchos campos:
-    const data = Object.fromEntries(new FormData(e.target)); // con Object.fromEntries podemos convertir un objeto iterable de pares clave/valor en un objeto normal, en este caso estamos convirtiendo el FormData en un objeto normal para poder acceder a sus propiedades de una forma mas sencilla
-    console.log(data);
+    // const data = Object.fromEntries(new FormData(e.target)); // con Object.fromEntries podemos convertir un objeto iterable de pares clave/valor en un objeto normal, en este caso estamos convirtiendo el FormData en un objeto normal para poder acceder a sus propiedades de una forma mas sencilla
+    // console.log(data);
 
     // ahora, con el formulario controlado, el valor del input ya lo tenemos en el estado query
     console.log({ query });
 
-    getMovies();
+    getMovies({ query });
   };
 
   // la forma "controlada" o "controlled form" es cuando cada input tiene un estado asociado y se actualiza cada vez que el usuario escribe algo
@@ -84,7 +99,17 @@ function App() {
     setQuery(newQuery);
 
     // aqui tambien podríamos hacer validaciones que estan en el useEffect que esta en el custom hook useSearch, de hecho, el linter genera el error react-hooks/set-state-in-effect, que nos dice que no es buena idea actualizar el estado dentro de un useEffect, ya que puede generar un bucle infinito de renderizados, por eso es mejor hacer las validaciones dentro del handleChange, para evitar ese error
+    
+    debouncedGetMovies(newQuery); // cada vez que el usuario escriba algo, se va a esperar 500ms para ejecutar la función getMovies, si el usuario sigue escribiendo antes de que pasen los 500ms, se va a reiniciar el contador y no se va a ejecutar la función hasta que el usuario deje de escribir por 500ms
   };
+
+  const handleSort = () => {
+    setSort(!sort);
+  }
+
+  useEffect(() => {
+    console.log('getMovies function created');
+  }, [getMovies]);
 
   return (
     <div className="page">
@@ -101,6 +126,7 @@ function App() {
             placeholder="Avengers, Star Wars, Matrix..."
             className="input"
           />
+          <input type="checkbox" onChange={handleSort} checked={sort} />
           <button type="submit" className="button">
             Buscar
           </button>
