@@ -4,6 +4,7 @@ import { Header } from './components/Header.jsx';
 import { Footer } from './components/Footer.jsx';
 import { useFilters } from './hooks/useFilters.js';
 import { CartProvider } from './context/cart.jsx';
+import { Cart } from './components/Cart.jsx';
 
 function App() {
   const { filterProducts } = useFilters();
@@ -13,6 +14,7 @@ function App() {
   return (
     <>
       <CartProvider>
+        <Cart></Cart>
         {/* prop drilling */}
         {/* <Header changeFilters={setFilters} /> */}
         {/* with context */}

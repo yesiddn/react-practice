@@ -1,10 +1,28 @@
-import './Cart.css'
-import { useId } from "react"
-import { CartIcon, ClearCartIcon } from "./Icons"
+import './Cart.css';
+import { useId } from 'react';
+import { CartIcon, ClearCartIcon } from './Icons';
+import { useCart } from '../hooks/useCart';
+
+function CartItem({ title, price, thumbnail, quantity, addToCart }) {
+  return (
+    <li>
+      <img src={thumbnail} alt={title} />
+      <div>
+        <strong>{title}</strong> - ${price.toFixed(2)}
+      </div>
+
+      <footer>
+        <small>Qty: {quantity}</small>
+        <button onClick={addToCart}>+</button>
+      </footer>
+    </li>
+  );
+}
 
 export function Cart() {
   const cartCheckboxId = useId();
-  
+  const { cart, clearCart, addToCart } = useCart();
+
   return (
     <>
       <label className="cart-button" htmlFor={cartCheckboxId}>
@@ -14,23 +32,14 @@ export function Cart() {
 
       <aside className="cart">
         <ul>
-          <li>
-            <img
-              src="https://cdn.dummyjson.com/product-images/2/thumbnail.jpg"
-              alt="Iphone"
-            />
-            <div>
-              <strong>iPhone</strong> - $999.99
-            </div>
-
-            <footer>
-              <small>Qty: 1</small>
-              <button>+</button>
-            </footer>
-          </li>
+          {
+            cart.map((item) => (
+              <CartItem key={item.id} {...item} addToCart={() => addToCart(item)} />
+            ))
+          }
         </ul>
 
-        <button>
+        <button className="clear-cart" onClick={clearCart}>
           <ClearCartIcon />
         </button>
       </aside>
